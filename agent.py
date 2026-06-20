@@ -3,8 +3,7 @@ from langgraph.graph import StateGraph, END
 from langgraph.graph.message import MessagesState
 from langgraph.prebuilt import ToolNode
 from langchain_openai import ChatOpenAI
-from sqlalchemy.orm import Session
-from database import engine, get_name
+from database import get_name
 
 load_dotenv()
 
@@ -35,11 +34,7 @@ graph = builder.compile()
 
 
 def run(prompt: str) -> str:
-    with Session(engine) as session:
-        result = graph.invoke(
-            {"messages": [("human", prompt)]},
-            config={"configurable": {"db_session": session}},
-        )
+    result = graph.invoke({"messages": [("human", prompt)]})
     return result["messages"][-1].content
 
 
