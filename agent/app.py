@@ -26,6 +26,7 @@ async def lifespan(app: FastAPI):
     async with AsyncPostgresSaver.from_conn_string(POSTGRES_CONN) as checkpointer:
         await checkpointer.setup()
         compiled_graph = builder.compile(checkpointer=checkpointer)
+        app.state.graph = compiled_graph
 
         add_langgraph_fastapi_endpoint(
             app=app,

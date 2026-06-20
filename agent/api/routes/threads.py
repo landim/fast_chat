@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from database import Thread, User, engine
@@ -50,6 +50,20 @@ def rename_thread(thread_id: str, body: ThreadPatch):
         session.commit()
         session.refresh(thread)
         return thread
+
+
+@router.get("/{thread_id}/messages")
+async def get_thread_messages(thread_id: str, request: Request):
+    from ag_ui_langgraph.utils import langchain_messages_to_agui
+    graph = getattr(request.app.state, "graph", None)
+    if graph is None:
+        return []
+    state = await graph.aget_state({"configurable": {"thread_id": thread_id}})
+    if not state or not state.values:
+        return []
+    messages = state.values.get("messages", [])
+    agui_messages = langchain_messages_to_agui(messages)
+    return [msg.model_dump() for msg in agui_messages]
 
 
 @router.delete("/{thread_id}", status_code=204)

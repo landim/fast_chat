@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { HttpAgent } from "@ag-ui/client";
 import { CopilotKit, useCopilotAction } from "@copilotkit/react-core";
 import { CopilotChat } from "@copilotkit/react-ui";
 import { ThreadSidebar } from "./components/ThreadSidebar";
+import { ThreadLoader } from "./components/ThreadLoader";
 import { ToolCall } from "./components/ToolCall";
 import styles from "./page.module.css";
-
-const agentUrl = process.env.NEXT_PUBLIC_AGENT_URL!;
 
 function ChatWithToolRendering() {
   useCopilotAction(
@@ -29,8 +27,6 @@ function ChatWithToolRendering() {
 export default function Home() {
   const [activeThreadId, setActiveThreadId] = useState<string>("");
 
-  const agent = new HttpAgent({ url: agentUrl });
-
   return (
     <div className={styles.layout}>
       <ThreadSidebar
@@ -40,13 +36,8 @@ export default function Home() {
       />
       <main className={styles.main}>
         {activeThreadId ? (
-          <CopilotKit
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore — direct HttpAgent connection (dev mode)
-            agents__unsafe_dev_only={{ get_name_agent: agent }}
-            agent="get_name_agent"
-            threadId={activeThreadId}
-          >
+          <CopilotKit runtimeUrl="/api/copilotkit" threadId={activeThreadId}>
+            <ThreadLoader threadId={activeThreadId} />
             <ChatWithToolRendering />
           </CopilotKit>
         ) : (
