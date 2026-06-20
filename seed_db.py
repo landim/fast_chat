@@ -1,5 +1,8 @@
-from database import engine, User
+from database import Base, engine, User
 from sqlalchemy.orm import Session
+
+# Create tables if they don't exist
+Base.metadata.create_all(engine)
 
 with Session(engine) as session:
     session.add_all([
