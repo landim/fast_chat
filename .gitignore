@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.db
+.venv/
+*.egg-info/
+.superpowers/
+node_modules/
+.next/
+frontend/.env.local
