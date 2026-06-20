@@ -1,7 +1,14 @@
-from database import Base, engine, User
+import os
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+from database import Base, User
 
-# Create tables if they don't exist
+load_dotenv()
+
+_conn = os.getenv("POSTGRES_CONN", "postgresql://langdb:langdb@localhost:5432/langdb")
+engine = create_engine(_conn.replace("postgresql://", "postgresql+psycopg://", 1))
+
 Base.metadata.create_all(engine)
 
 with Session(engine) as session:
