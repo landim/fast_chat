@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime, Foreign
 from sqlalchemy.orm import DeclarativeBase, Session, relationship
 from langchain_core.tools import tool
 
-_url = os.getenv("DATABASE_URL", "postgresql://langdb:langdb@localhost:5432/langdb")
+_url = os.getenv("DATABASE_URL", "postgresql://langdb:langdb@localhost:5442/langdb")
 DATABASE_URL = _url.replace("postgresql://", "postgresql+psycopg://", 1)
 engine = create_engine(DATABASE_URL)
 

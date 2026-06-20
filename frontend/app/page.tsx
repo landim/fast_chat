@@ -19,6 +19,7 @@ export default function Home() {
       <ThreadSidebar
         activeThreadId={activeThreadId}
         onSelect={setActiveThreadId}
+        userId={1}
       />
       <main className={styles.main}>
         {activeThreadId ? (
@@ -26,6 +27,7 @@ export default function Home() {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore — direct HttpAgent connection (dev mode)
             agents__unsafe_dev_only={{ get_name_agent: agent }}
+            agent="get_name_agent"
             threadId={activeThreadId}
           >
             <CopilotChat
