@@ -2,12 +2,29 @@
 
 import { useState } from "react";
 import { HttpAgent } from "@ag-ui/client";
-import { CopilotKit } from "@copilotkit/react-core";
+import { CopilotKit, useCopilotAction } from "@copilotkit/react-core";
 import { CopilotChat } from "@copilotkit/react-ui";
 import { ThreadSidebar } from "./components/ThreadSidebar";
+import { ToolCall } from "./components/ToolCall";
 import styles from "./page.module.css";
 
 const agentUrl = process.env.NEXT_PUBLIC_AGENT_URL!;
+
+function ChatWithToolRendering() {
+  useCopilotAction(
+    {
+      name: "*",
+      render: ({ name, status }) => <ToolCall name={name} status={status} />,
+    },
+    []
+  );
+  return (
+    <CopilotChat
+      className={styles.chat}
+      labels={{ title: "LangDB Agent", initial: "Ask me anything about users." }}
+    />
+  );
+}
 
 export default function Home() {
   const [activeThreadId, setActiveThreadId] = useState<string>("");
@@ -30,10 +47,7 @@ export default function Home() {
             agent="get_name_agent"
             threadId={activeThreadId}
           >
-            <CopilotChat
-              className={styles.chat}
-              labels={{ title: "LangDB Agent", initial: "Ask me anything about users." }}
-            />
+            <ChatWithToolRendering />
           </CopilotKit>
         ) : (
           <div className={styles.empty}>
