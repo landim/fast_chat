@@ -1,6 +1,6 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
-from sqlalchemy.orm import DeclarativeBase, Session
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Session, relationship
 from langchain_core.tools import tool
 
 DATABASE_URL = os.getenv(
@@ -18,6 +18,7 @@ class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+    threads = relationship("Thread", back_populates="user")
 
 
 class Thread(Base):
@@ -26,6 +27,8 @@ class Thread(Base):
     title = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user = relationship("User", back_populates="threads")
 
 
 @tool
