@@ -10,21 +10,19 @@ from copilotkit import LangGraphAGUIAgent
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 from agent import builder
-from database import Base, engine
+from database import engine
 from api.routes.threads import router as threads_router
 
 load_dotenv()
 
 POSTGRES_CONN = os.getenv(
-    "POSTGRES_CONN",
-    "postgresql://langdb:langdb@localhost:5432/langdb",
+    "DATABASE_URL",
+    "postgresql://langdb:langdb@localhost:5442/langdb",
 )
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(engine)
-
     async with AsyncPostgresSaver.from_conn_string(POSTGRES_CONN) as checkpointer:
         await checkpointer.setup()
         compiled_graph = builder.compile(checkpointer=checkpointer)
@@ -57,4 +55,5 @@ app.include_router(threads_router)
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
