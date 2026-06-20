@@ -1,9 +1,12 @@
-from sqlalchemy import create_engine, Column, Integer, String
+import os
+from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from sqlalchemy.orm import DeclarativeBase, Session
 from langchain_core.tools import tool
-from langchain_core.runnables import RunnableConfig
 
-DATABASE_URL = "sqlite:///users.db"
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg://langdb:langdb@localhost:5432/langdb"
+)
 engine = create_engine(DATABASE_URL)
 
 
@@ -17,14 +20,19 @@ class User(Base):
     name = Column(String, nullable=False)
 
 
-Base.metadata.create_all(engine)
+class Thread(Base):
+    __tablename__ = "threads"
+    id = Column(String, primary_key=True)           # UUID string
+    title = Column(String, nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
 
 @tool
-def get_name(user_id: int, config: RunnableConfig) -> str:
+def get_name(user_id: int) -> str:
     """Look up a user's name by their ID in the database."""
-    session: Session = config["configurable"]["db_session"]
-    user = session.get(User, user_id)
-    if user is None:
-        return f"No user found with id {user_id}"
-    return user.name
+    with Session(engine) as session:
+        user = session.get(User, user_id)
+        if user is None:
+            return f"No user found with id {user_id}"
+        return user.name
