@@ -24,8 +24,8 @@ class Thread(Base):
     __tablename__ = "threads"
     id = Column(String, primary_key=True)           # UUID string
     title = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
 
 
 @tool
