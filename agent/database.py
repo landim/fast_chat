@@ -3,10 +3,8 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime, Foreign
 from sqlalchemy.orm import DeclarativeBase, Session, relationship
 from langchain_core.tools import tool
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+psycopg://langdb:langdb@localhost:5432/langdb"
-)
+_url = os.getenv("DATABASE_URL", "postgresql://langdb:langdb@localhost:5432/langdb")
+DATABASE_URL = _url.replace("postgresql://", "postgresql+psycopg://", 1)
 engine = create_engine(DATABASE_URL)
 
 
@@ -23,7 +21,7 @@ class User(Base):
 
 class Thread(Base):
     __tablename__ = "threads"
-    id = Column(String, primary_key=True)           # UUID string
+    id = Column(String, primary_key=True)  # UUID string
     title = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=False)
