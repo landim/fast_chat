@@ -11,7 +11,7 @@ interface Props {
 }
 
 export function ThreadSidebar({ activeThreadId, onSelect, userId }: Props) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
   const [threads, setThreads] = useState<Thread[]>([]);
 
   const fetchThreads = () =>

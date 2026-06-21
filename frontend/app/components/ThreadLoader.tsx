@@ -9,7 +9,7 @@ interface Props {
 
 export function ThreadLoader({ threadId }: Props) {
   const { agent } = useAgent();
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
   const loadedRef = useRef<string | null>(null);
 
   useEffect(() => {

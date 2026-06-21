@@ -1,0 +1,20 @@
+# Copy this file to terraform.tfvars and fill in the required values.
+# terraform.tfvars is gitignored — never commit secrets.
+
+# Required
+openai_api_key = "sk-..."
+
+# Optional — leave blank to disable LangSmith tracing
+langsmith_api_key = ""
+langsmith_project = "langdb"
+
+# Image tags — set to a git SHA after build-and-push.sh for stable deploys
+agent_image_tag    = "latest"
+frontend_image_tag = "latest"
+
+# AWS region (default: us-east-1)
+# aws_region = "us-east-1"
+
+# RDS sizing (defaults are fine for prototyping)
+# db_instance_class    = "db.t4g.micro"
+# db_allocated_storage = 20
