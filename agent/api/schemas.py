@@ -13,7 +13,6 @@ class ThreadOut(BaseModel):
 
 
 class ThreadCreate(BaseModel):
-    user_id: int
     title: str = "New conversation"
 
 

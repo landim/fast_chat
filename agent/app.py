@@ -4,6 +4,9 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
+from starlette.responses import JSONResponse
 
 from ag_ui_langgraph import add_langgraph_fastapi_endpoint
 from copilotkit import LangGraphAGUIAgent
@@ -53,6 +56,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+_PROTECTED_PREFIXES = ("/agent", "/threads")
+
+class AuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: StarletteRequest, call_next):
+        if request.method == "OPTIONS":
+            return await call_next(request)
+        path = request.url.path
+        if any(path == p or path.startswith(p + "/") for p in _PROTECTED_PREFIXES):
+            auth = request.headers.get("authorization", "")
+            if not auth.lower().startswith("bearer "):
+                return JSONResponse(
+                    {"detail": "Not authenticated"}, status_code=401,
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+        return await call_next(request)
+
+app.add_middleware(AuthMiddleware)
 
 app.include_router(threads_router)
 
