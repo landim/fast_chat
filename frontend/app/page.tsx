@@ -6,9 +6,41 @@ import { CopilotChat } from "@copilotkit/react-ui";
 import { ThreadSidebar } from "./components/ThreadSidebar";
 import { ThreadLoader } from "./components/ThreadLoader";
 import { ToolCall } from "./components/ToolCall";
+import { AskUserQuestion } from "./components/AskUserQuestion";
 import styles from "./page.module.css";
 
 function ChatWithToolRendering() {
+  useCopilotAction(
+    {
+      name: "ask_user_question",
+      description:
+        "Ask the user a clarifying question to get more context before answering. " +
+        "Use during reasoning when the request is ambiguous or missing detail.",
+      parameters: [
+        {
+          name: "question",
+          type: "string",
+          description: "The question to ask the user",
+          required: true,
+        },
+        {
+          name: "options",
+          type: "string[]",
+          description: "Optional suggested answers shown as buttons",
+          required: false,
+        },
+      ],
+      renderAndWaitForResponse: ({ args, respond, status }) => (
+        <AskUserQuestion
+          question={(args.question as unknown) as string}
+          options={(args.options as unknown) as string[] | undefined}
+          status={status}
+          respond={respond}
+        />
+      ),
+    },
+    []
+  );
   useCopilotAction(
     {
       name: "*",
