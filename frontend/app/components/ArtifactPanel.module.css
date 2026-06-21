@@ -1,0 +1,39 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: #f9f9f9;
+  border-left: 1px solid #e5e5e5;
+}
+
+.content {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+}
+
+.pre {
+  margin: 0;
+  font-family: var(--font-geist-mono, monospace);
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #1a1a1a;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: #f9f9f9;
+  border-left: 1px solid #e5e5e5;
+}
+
+.hint {
+  color: #aaa;
+  font-size: 14px;
+  text-align: center;
+  padding: 0 24px;
+}

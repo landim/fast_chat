@@ -1,30 +1,30 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useCopilotChatInternal } from "@copilotkit/react-core";
+import { useAgent } from "@copilotkit/react-core/v2";
 
 interface Props {
   threadId: string;
 }
 
 export function ThreadLoader({ threadId }: Props) {
-  const { setMessages, isAvailable } = useCopilotChatInternal({});
+  const { agent } = useAgent();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
   const loadedRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!isAvailable || !threadId) return;
+    if (!agent || !threadId) return;
     if (loadedRef.current === threadId) return;
     loadedRef.current = threadId;
 
-    setMessages([]);
+    agent.setMessages([]);
     fetch(`${apiUrl}/threads/${threadId}/messages`)
       .then((r) => r.json())
       .then((msgs) => {
-        if (Array.isArray(msgs) && msgs.length > 0) setMessages(msgs);
+        if (Array.isArray(msgs) && msgs.length > 0) agent.setMessages(msgs);
       })
       .catch(console.error);
-  }, [threadId, isAvailable]);
+  }, [threadId, agent]);
 
   return null;
 }

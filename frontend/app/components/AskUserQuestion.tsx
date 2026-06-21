@@ -6,8 +6,8 @@ import styles from "./AskUserQuestion.module.css";
 interface AskUserQuestionProps {
   question: string;
   options?: string[];
-  status: "inProgress" | "executing" | "complete";
-  respond?: (answer: string) => void;
+  status: string;
+  respond?: (answer: string) => void | Promise<void>;
 }
 
 export function AskUserQuestion({
