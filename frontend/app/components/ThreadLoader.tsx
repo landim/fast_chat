@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { useAgent } from "@copilotkit/react-core/v2";
+import { useAuth } from "../auth/AuthContext";
+import { authFetch } from "../auth/authFetch";
 
 interface Props {
   threadId: string;
@@ -9,6 +11,7 @@ interface Props {
 
 export function ThreadLoader({ threadId }: Props) {
   const { agent } = useAgent();
+  const { getIdToken } = useAuth();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
   const loadedRef = useRef<string | null>(null);
 
@@ -18,13 +21,13 @@ export function ThreadLoader({ threadId }: Props) {
     loadedRef.current = threadId;
 
     agent.setMessages([]);
-    fetch(`${apiUrl}/threads/${threadId}/messages`)
+    authFetch(getIdToken, `${apiUrl}/threads/${threadId}/messages`)
       .then((r) => r.json())
       .then((msgs) => {
         if (Array.isArray(msgs) && msgs.length > 0) agent.setMessages(msgs);
       })
       .catch(console.error);
-  }, [threadId, agent]);
+  }, [threadId, agent, getIdToken]);
 
   return null;
 }

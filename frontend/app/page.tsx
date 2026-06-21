@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import {
   CopilotKit,
@@ -85,12 +85,13 @@ export default function Home() {
   const { loading, idToken, getIdToken } = useAuth();
   const router = useRouter();
 
-  if (loading) return null;
+  useEffect(() => {
+    if (!loading && !idToken) {
+      router.replace("/login");
+    }
+  }, [loading, idToken, router]);
 
-  if (!idToken) {
-    router.replace("/login");
-    return null;
-  }
+  if (loading || !idToken) return null;
 
   return (
     <div className={styles.layout}>

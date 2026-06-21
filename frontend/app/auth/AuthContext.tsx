@@ -22,6 +22,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   getIdToken: () => Promise<string | null>;
+  completeNewPassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [idToken, setIdToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const userPoolRef = useRef<CognitoUserPool | null>(null);
+  const pendingUserRef = useRef<CognitoUser | null>(null);
 
   // Fetch Cognito config at runtime (not baked at build time)
   useEffect(() => {
@@ -109,11 +111,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           onFailure: (err) => {
             reject(err);
           },
+          newPasswordRequired: () => {
+            pendingUserRef.current = cognitoUser;
+            reject(new Error("NEW_PASSWORD_REQUIRED"));
+          },
         });
       });
     },
     []
   );
+
+  const completeNewPassword = useCallback((newPassword: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const cognitoUser = pendingUserRef.current;
+      if (!cognitoUser) {
+        reject(new Error("No pending new-password challenge"));
+        return;
+      }
+      cognitoUser.completeNewPasswordChallenge(newPassword, {}, {
+        onSuccess: (session: CognitoUserSession) => {
+          pendingUserRef.current = null;
+          setUser(cognitoUser);
+          setIdToken(session.getIdToken().getJwtToken());
+          resolve();
+        },
+        onFailure: (err) => {
+          reject(err);
+        },
+      });
+    });
+  }, []);
 
   const logout = useCallback(() => {
     if (user) {
@@ -152,6 +179,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     logout,
     getIdToken,
+    completeNewPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

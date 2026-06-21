@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../auth/AuthContext";
 
 export default function LoginPage() {
-  const { login, idToken, loading } = useAuth();
+  const { login, completeNewPassword, idToken, loading } = useAuth();
   const router = useRouter();
 
+  const [step, setStep] = useState<"login" | "new-password">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -28,8 +31,32 @@ export default function LoginPage() {
       await login(email, password);
       router.push("/");
     } catch (err: unknown) {
+      if (err instanceof Error && err.message === "NEW_PASSWORD_REQUIRED") {
+        setStep("new-password");
+      } else {
+        const message =
+          err instanceof Error ? err.message : "Login failed. Please try again.";
+        setError(message);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleNewPassword(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setError(null);
+    setSubmitting(true);
+    try {
+      await completeNewPassword(newPassword);
+      router.push("/");
+    } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "Login failed. Please try again.";
+        err instanceof Error ? err.message : "Failed to set password. Please try again.";
       setError(message);
     } finally {
       setSubmitting(false);
@@ -39,6 +66,60 @@ export default function LoginPage() {
   // While the auth context is initialising, show nothing to avoid flash
   if (loading) {
     return null;
+  }
+
+  if (step === "new-password") {
+    return (
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <h1 style={styles.heading}>Set a new password</h1>
+          <p style={styles.hint}>Your account requires a new password before you can continue.</p>
+
+          <form onSubmit={handleNewPassword} style={styles.form}>
+            <label style={styles.label} htmlFor="new-password">
+              New password
+            </label>
+            <input
+              id="new-password"
+              type="password"
+              autoComplete="new-password"
+              required
+              disabled={submitting}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              style={styles.input}
+            />
+
+            <label style={styles.label} htmlFor="confirm-password">
+              Confirm password
+            </label>
+            <input
+              id="confirm-password"
+              type="password"
+              autoComplete="new-password"
+              required
+              disabled={submitting}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              style={styles.input}
+            />
+
+            {error && <p style={styles.error}>{error}</p>}
+
+            <button
+              type="submit"
+              disabled={submitting}
+              style={{
+                ...styles.button,
+                ...(submitting ? styles.buttonDisabled : {}),
+              }}
+            >
+              {submitting ? "Setting password…" : "Set password"}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -139,6 +220,12 @@ const styles = {
     outline: "none",
     width: "100%",
     boxSizing: "border-box",
+  } as React.CSSProperties,
+
+  hint: {
+    margin: "-12px 0 16px",
+    fontSize: "14px",
+    color: "#6b7280",
   } as React.CSSProperties,
 
   error: {
