@@ -14,7 +14,7 @@ class AgentState(CopilotKitState):
 
 backend_tools = [get_name]
 BACKEND_TOOL_NAMES = {t.name for t in backend_tools}
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
+llm = ChatOpenAI(model="gpt-4o", reasoning_effort="auto")
 
 
 def call_model(state: AgentState) -> dict:
