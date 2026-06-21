@@ -1,9 +1,11 @@
+import json as _json
 import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import JSONResponse
@@ -13,7 +15,8 @@ from copilotkit import LangGraphAGUIAgent
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 from agent import builder
-from database import engine
+from auth import verify_id_token
+from database import Thread, engine, get_or_create_user_by_cognito
 from api.routes.threads import router as threads_router
 
 load_dotenv()
@@ -71,6 +74,33 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     {"detail": "Not authenticated"}, status_code=401,
                     headers={"WWW-Authenticate": "Bearer"},
                 )
+            token = auth.split(" ", 1)[1]
+            try:
+                payload = verify_id_token(token)
+            except HTTPException as exc:
+                return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+            request.state.cognito_payload = payload
+
+            # Thread ownership check for /agent
+            if path == "/agent" or path.startswith("/agent/"):
+                try:
+                    body_bytes = await request.body()
+                    data = _json.loads(body_bytes)
+                    thread_id = data.get("thread_id")
+                    if thread_id:
+                        sub = payload["sub"]
+                        email = payload.get("email", "")
+                        name = payload.get("name") or payload.get("cognito:username") or email
+                        with Session(engine) as session:
+                            user = get_or_create_user_by_cognito(session, sub, email, name)
+                            thread = session.get(Thread, thread_id)
+                            if thread is not None and thread.user_id != user.id:
+                                return JSONResponse(
+                                    {"detail": "Not your thread"}, status_code=403
+                                )
+                except Exception:
+                    pass  # parsing failure → let request through
+
         return await call_next(request)
 
 app.add_middleware(AuthMiddleware)
