@@ -27,3 +27,18 @@ output "ecs_cluster_name" {
   description = "ECS cluster name (for use with the deploy script)"
   value       = aws_ecs_cluster.main.name
 }
+
+output "cognito_user_pool_id" {
+  description = "Cognito User Pool ID"
+  value       = aws_cognito_user_pool.main.id
+}
+
+output "cognito_client_id" {
+  description = "Cognito App Client ID (web, public)"
+  value       = aws_cognito_user_pool_client.web.id
+}
+
+output "cognito_region" {
+  description = "AWS region where the Cognito User Pool lives"
+  value       = var.aws_region
+}
