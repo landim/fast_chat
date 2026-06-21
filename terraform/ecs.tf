@@ -163,6 +163,9 @@ resource "aws_ecs_task_definition" "agent" {
       { name = "ALLOWED_ORIGINS", value = "http://${aws_lb.main.dns_name}" },
       { name = "LANGSMITH_TRACING", value = var.langsmith_api_key != "" ? "true" : "false" },
       { name = "LANGSMITH_PROJECT", value = var.langsmith_project },
+      { name = "COGNITO_REGION",       value = var.aws_region },
+      { name = "COGNITO_USER_POOL_ID", value = aws_cognito_user_pool.main.id },
+      { name = "COGNITO_CLIENT_ID",    value = aws_cognito_user_pool_client.web.id },
     ]
 
     secrets = local.agent_secrets
@@ -228,6 +231,9 @@ resource "aws_ecs_task_definition" "frontend" {
       # Server-side env var: Next.js API route uses this to call the agent.
       # The ALB is the single entry point so this URL is also the public origin.
       { name = "AGENT_URL", value = "http://${aws_lb.main.dns_name}/agent" },
+      { name = "COGNITO_REGION",       value = var.aws_region },
+      { name = "COGNITO_USER_POOL_ID", value = aws_cognito_user_pool.main.id },
+      { name = "COGNITO_CLIENT_ID",    value = aws_cognito_user_pool_client.web.id },
     ]
 
     logConfiguration = {
