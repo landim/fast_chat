@@ -16,7 +16,20 @@ class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+    cognito_sub = Column(String, unique=True, nullable=True)
+    email = Column(String, nullable=True)
     threads = relationship("Thread", back_populates="user")
+
+
+def get_or_create_user_by_cognito(session: Session, sub: str, email: str, name: str) -> "User":
+    """Return existing service user for this Cognito sub, or JIT-create one."""
+    user = session.query(User).filter(User.cognito_sub == sub).first()
+    if user is None:
+        user = User(name=name or email, cognito_sub=sub, email=email)
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+    return user
 
 
 class Thread(Base):
