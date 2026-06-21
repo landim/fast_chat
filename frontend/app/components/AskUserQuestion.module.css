@@ -1,0 +1,116 @@
+/* Matches ToolCall.module.css container visually */
+.container {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 420px;
+}
+
+.question {
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 10px;
+}
+
+/* Option buttons row */
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.optionBtn {
+  border-radius: 9999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: none;
+  padding: 4px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+.optionBtn:hover:not(:disabled) {
+  background: #bfdbfe;
+}
+
+.optionBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Free-text input row */
+.inputRow {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+
+.textInput {
+  flex: 1;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  outline: none;
+  background: #ffffff;
+  color: #1e293b;
+  transition: border-color 0.15s;
+}
+
+.textInput:focus {
+  border-color: #3b82f6;
+}
+
+.textInput:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: default;
+}
+
+.sendBtn {
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.sendBtn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.sendBtn:disabled {
+  background: #94a3b8;
+  cursor: default;
+}
+
+/* Complete view — answered indicator */
+.answeredRow {
+  margin-top: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 12px;
+}
+
+.answeredPill {
+  display: inline-block;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 9999px;
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 500;
+}
