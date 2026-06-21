@@ -8,6 +8,8 @@ import {
   useRenderTool,
   useHumanInTheLoop,
 } from "@copilotkit/react-core/v2";
+import { useRouter } from "next/navigation";
+import { useAuth } from "./auth/AuthContext";
 import { ThreadSidebar } from "./components/ThreadSidebar";
 import { ThreadLoader } from "./components/ThreadLoader";
 import { ArtifactPanel } from "./components/ArtifactPanel";
@@ -80,16 +82,28 @@ function ChatWithTools({ threadId }: { threadId: string }) {
 
 export default function Home() {
   const [activeThreadId, setActiveThreadId] = useState<string>("");
+  const { loading, idToken, getIdToken } = useAuth();
+  const router = useRouter();
+
+  if (loading) return null;
+
+  if (!idToken) {
+    router.replace("/login");
+    return null;
+  }
 
   return (
     <div className={styles.layout}>
       <ThreadSidebar
         activeThreadId={activeThreadId}
         onSelect={setActiveThreadId}
-        userId={1}
+        getIdToken={getIdToken}
       />
       <main className={styles.main}>
-        <CopilotKit runtimeUrl="/api/copilotkit">
+        <CopilotKit
+          runtimeUrl="/api/copilotkit"
+          headers={{ Authorization: `Bearer ${idToken}` }}
+        >
           <div className={styles.splitPane}>
             <div className={styles.chatArea}>
               <ChatWithTools threadId={activeThreadId} />

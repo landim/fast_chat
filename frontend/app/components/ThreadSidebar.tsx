@@ -2,33 +2,34 @@
 
 import { useEffect, useState } from "react";
 import { Thread } from "../types";
+import { authFetch } from "../auth/authFetch";
 import styles from "./ThreadSidebar.module.css";
 
 interface Props {
   activeThreadId: string | null;
   onSelect: (id: string) => void;
-  userId: number;
+  getIdToken: () => Promise<string | null>;
 }
 
-export function ThreadSidebar({ activeThreadId, onSelect, userId }: Props) {
+export function ThreadSidebar({ activeThreadId, onSelect, getIdToken }: Props) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
   const [threads, setThreads] = useState<Thread[]>([]);
 
   const fetchThreads = () =>
-    fetch(`${apiUrl}/threads?user_id=${userId}`)
+    authFetch(getIdToken, `${apiUrl}/threads`)
       .then((r) => r.json())
       .then(setThreads)
       .catch(console.error);
 
   useEffect(() => {
     fetchThreads();
-  }, [userId]);
+  }, [getIdToken]);
 
   const createThread = async () => {
-    const res = await fetch(`${apiUrl}/threads`, {
+    const res = await authFetch(getIdToken, `${apiUrl}/threads`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, title: "New conversation" }),
+      body: JSON.stringify({ title: "New conversation" }),
     });
     if (!res.ok) return;
     const thread: Thread = await res.json();
@@ -38,7 +39,7 @@ export function ThreadSidebar({ activeThreadId, onSelect, userId }: Props) {
 
   const deleteThread = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    await fetch(`${apiUrl}/threads/${id}`, { method: "DELETE" });
+    await authFetch(getIdToken, `${apiUrl}/threads/${id}`, { method: "DELETE" });
     setThreads((prev) => prev.filter((t) => t.id !== id));
     if (activeThreadId === id) onSelect("");
   };
